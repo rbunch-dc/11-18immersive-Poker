@@ -12,9 +12,13 @@ class PokerTable extends Component{
         console.log(this.cards);
         this.state = {
             playersHand: ['deck','deck'],
-            dealersHand: ['deck','deck']
+            dealersHand: ['deck','deck'],
+            communityCards: ['deck','deck','deck','deck','deck'],
+            wager: 0,
+            bankroll: 10000
         }
         this.prepDeck = this.prepDeck.bind(this);
+        this.playerBet = this.playerBet.bind(this);
     }
 
     // This is a custom method. Not coming from "React"
@@ -36,12 +40,49 @@ class PokerTable extends Component{
         })
     }
 
+    // this method will be sent to GameButtons and is used
+    // update the player bet.
+    // After they bet, we will call draw
+    playerBet(amount){
+        // this.state.wager += amount BAD!!!
+        const newWager = this.state.wager + amount;
+        const newBankRoll =  this.state.bankroll - amount;
+        this.setState({
+            wager: newWager,
+            bankroll: newBankRoll,
+        })
+        this.draw();
+    }
+
+    // draw is called whenever a new community card needs to be drawn
+    draw(){
+        // we have to use Object.assign (or ...) to make a seaprate
+        // copy of state
+        let communityNewHand = Object.assign([],this.state.communityCards);
+        // const communityNewHand = this.state.communityCards; BAD BAD BAD!!!
+        if(communityNewHand[0] === 'deck'){
+            // this is the first draw, so draw 3 cards
+            communityNewHand = [this.cards.deck.shift(),this.cards.deck.shift(),this.cards.deck.shift()]
+        }else{
+            // this isn't the first draw, so only draw 1
+            communityNewHand.push(this.cards.deck.shift());
+        }
+        this.setState({
+            communityCards: communityNewHand
+        })
+    }
+
     render(){
         return(
             <div className="col-sm-12 the-table">
+                <div className="col-sm-12 text-center">
+                    Current wager ${this.state.wager}
+                    Current bankroll ${this.state.bankroll}
+                </div>             
                 <PokerHand cards={this.state.dealersHand} />
+                <PokerHand cards={this.state.communityCards} />
                 <PokerHand cards={this.state.playersHand} />
-                <GameButtons dealFunction={this.prepDeck}/>
+                <GameButtons dealFunction={this.prepDeck} betFunction={this.playerBet}/>
             </div>
         )
     }
