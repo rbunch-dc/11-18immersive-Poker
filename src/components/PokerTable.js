@@ -21,6 +21,8 @@ class PokerTable extends Component{
     // we can't put this in our Deck class, because it's 
     // specific to our Hold Em
     prepDeck(){
+        this.cards.createDeck();
+        this.cards.shuffleDeck();
         this.cards.deck.shift(); //burn card
         const card1 = this.cards.deck.shift();
         const card2 = this.cards.deck.shift();
